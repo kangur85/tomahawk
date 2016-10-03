@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.kaszkowiak.tomahawk.transforms;
 
 import eu.kaszkowiak.tomahawk.helpers.ConfigurationSearcher;
@@ -18,7 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * @author Krzysztof
+ * @author kan
  */
 public class ResolveUsesTransform {
 

@@ -14,7 +14,7 @@ import org.apache.commons.lang.StringUtils;
 
 /**
  *
- * @author Krzysztof
+ * @author kan
  */
 public class TagDirective extends Directive {
 

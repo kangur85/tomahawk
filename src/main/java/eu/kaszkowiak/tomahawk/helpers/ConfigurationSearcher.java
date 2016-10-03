@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To changet this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.kaszkowiak.tomahawk.helpers;
 
 import eu.kaszkowiak.tomahawk.model.Configuration;
@@ -17,7 +12,7 @@ import org.apache.commons.lang.StringUtils;
 
 /**
  *
- * @author Krzysztof
+ * @author kan
  */
 public class ConfigurationSearcher {
     

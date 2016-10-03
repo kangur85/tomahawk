@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.kaszkowiak.tomahawk.model.directives;
 
 import eu.kaszkowiak.tomahawk.formatting.FormattingConfiguration;
@@ -46,7 +41,7 @@ public class TagDirectiveTest extends TestCase {
         tag.addParam("$a");
         tag.addParam("$b");
         tag.addParam("${c}");
-        
+
         tagBL = new TagDirective();
         SimpleDirective directiveBL = new SimpleDirective();
         tagBL.addChildEntry(new BlankLine());
@@ -65,7 +60,7 @@ public class TagDirectiveTest extends TestCase {
         tagBL.addParam("$a");
         tagBL.addParam("$b");
         tagBL.addParam("${c}");
-        
+
         replaceMap = new HashMap();
         replaceMap.put("$a", "1");
         replaceMap.put("$b", "2");
@@ -111,39 +106,39 @@ public class TagDirectiveTest extends TestCase {
                 = "<Macro macroName $a $b ${c}>\n"
                 + "\ttest 3 2 1\n"
                 + "</Macro>";
-        
+
         assertEquals(expected, tag.toString(fc));
     }
-    
+
     public void testReplaceAllBlankLineFirst() {
         tagBL.replaceAll(replaceMap);
-        
+
         FormattingConfiguration fc = new FormattingConfiguration();
         fc.setPrintComments(false)
-          .setPrintEmptyLines(false);        
-        
+          .setPrintEmptyLines(false);
+
         String expected
                 = "<Macro macroName $a $b ${c}>\n"
                 + "\ttest 3 2 1\n"
-                + "</Macro>";        
-        
+                + "</Macro>";
+
         assertEquals(expected, tagBL.toString(fc));
     }
-    
+
     public void testReplaceAllBlankLine() {
         tagBL.replaceAll(replaceMap);
-        
+
         FormattingConfiguration fc = new FormattingConfiguration();
         fc.setPrintComments(false)
-          .setPrintEmptyLines(true);        
-        
+          .setPrintEmptyLines(true);
+
         String expected
                 = "<Macro macroName $a $b ${c}>\n"
                 + "\t\n"
                 + "\ttest 3 2 1\n"
-                + "\t\n" 
-                + "</Macro>";        
-        
+                + "\t\n"
+                + "</Macro>";
+
         assertEquals(expected, tagBL.toString(fc));
     }
 
@@ -158,7 +153,7 @@ public class TagDirectiveTest extends TestCase {
 
         assertEquals(expected, tag.toString());
     }
-    
+
      public void testToStringBlankChildren() {
         tagBL.setChildren(new ArrayList());
         tagBL.addChildEntry(new BlankLine());
@@ -168,13 +163,13 @@ public class TagDirectiveTest extends TestCase {
                 + "</Macro>";
 
         tagBL.replaceAll(null);
-        
+
         FormattingConfiguration fc = new FormattingConfiguration();
-        fc.setPrintEmptyLines(false);   
+        fc.setPrintEmptyLines(false);
 
         assertEquals(expected, tagBL.toString(fc));
     }
-     
+
     public void testToStringBlankLineOnly() {
         tag.setChildren(new ArrayList());
         tag.addChildEntry(new BlankLine());
@@ -187,6 +182,6 @@ public class TagDirectiveTest extends TestCase {
         tag.replaceAll(null);
 
         assertEquals(expected, tag.toString());
-    } 
+    }
 
 }
