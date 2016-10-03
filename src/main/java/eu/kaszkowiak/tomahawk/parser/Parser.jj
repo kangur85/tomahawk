@@ -1,0 +1,216 @@
+options {
+  JAVA_UNICODE_ESCAPE = true;
+  ERROR_REPORTING = true;
+  STATIC = false;
+  JDK_VERSION = "1.7";
+  BUILD_PARSER = true;
+}
+
+PARSER_BEGIN(Parser)
+
+package eu.kaszkowiak.tomahawk.parser;
+
+import java.io.Reader;
+import java.io.StringReader;
+import eu.kaszkowiak.tomahawk.model.*;
+import eu.kaszkowiak.tomahawk.model.formatting.*;
+import eu.kaszkowiak.tomahawk.model.directives.*;
+
+public class Parser {
+
+    public Parser(String source) {
+        this((Reader)(new StringReader(source)));
+    }
+}
+PARSER_END(Parser)
+
+
+MORE : { < "\"" >  : IN_STRING_STATE}
+<IN_STRING_STATE> MORE : { < "\\" ["\"", "\\"] >  }
+<IN_STRING_STATE> MORE : { < ~["\""] >  }
+<IN_STRING_STATE> TOKEN : { < STRING_SQ : "\"" >  : DEFAULT }
+
+MORE : { < "#" > : IN_COMMENT_STATE}
+<IN_COMMENT_STATE> MORE : { < (~["\n", "\r"]) > }
+<IN_COMMENT_STATE> TOKEN : { < COMMENT : ("\n"| "\r\n"| "\r") > : DEFAULT }
+
+TOKEN :
+{
+        <ENDLINE: (("\n"| "\r\n"| "\r"))>
+      | <INCLUDE: "Include">
+      | <USE: "Use">
+      | <PARAM: (["A"-"Z","a"-"z", "$", "{", "}", "_", ".", "/", "0"-"9",
+		"@", "-", "+", "*", ",", "^", "(", ")", "[", "]", "\\", "?", "%", "!",
+		"&", "=", "|", ":"])+ >
+      | <LEFT_CROC: "<">
+      | <RIGHT_CROC: ">">
+      | <LEFT_ENDING_CROC: "</">
+}
+
+SKIP : { <WHITESPACE: [" ", "\t"]> }
+
+Configuration parse():
+{
+    Configuration config = new Configuration();
+    ConfigurationEntry ce;
+    Comment comment;
+}
+{
+    (
+        ce=configurationEntry() { config.addEntry(ce); }
+    )+
+    { return config; }
+}
+
+ConfigurationEntry configurationEntry():
+{
+    ConfigurationEntry ce;
+}
+{
+    (
+          ce=directive()
+        | ce=formatingEntry()
+    )
+    { return ce; }
+}
+
+FormattingEntry formatingEntry():
+{
+    FormattingEntry fe;
+}
+{
+    (
+        fe=comment()
+      | fe=blankLine()
+    )
+    { return fe; }
+}
+
+Directive directive():
+{
+    Directive dir;
+}
+{
+    (
+        dir=tagDirective()
+      | dir=useDirective()
+      | dir=includeDirective()
+      | dir=simpleDirective()
+    )
+    endline()
+    { return dir; }
+}
+
+IncludeDirective includeDirective():
+{
+    IncludeDirective id;
+    String includeText;
+}
+{
+    (
+        <INCLUDE>
+        includeText=param() { id = new IncludeDirective(includeText); }
+    )
+    { return id; }
+}
+
+UseDirective useDirective():
+{
+    UseDirective res = new UseDirective();
+    String param;
+    String macroName;
+}
+{
+    (
+        <USE>
+        macroName=param() { res.setMacroName(macroName); }
+        ( param=param() { res.addParam(param); } )*
+    )
+    { return res; }
+}
+
+BlankLine blankLine():
+{
+}
+{
+    <ENDLINE>
+    { return new BlankLine(); }
+}
+
+Comment comment():
+{
+    Token tStr = null;
+    String res;
+}
+{
+    tStr=<COMMENT>
+    {
+        res = tStr.image;
+        if (res.length() > 1) {
+            res = res.substring(0, res.length()-1);
+            return new Comment(res);
+        }
+        else {
+            return null;
+        }
+    }
+}
+
+SimpleDirective simpleDirective():
+{
+    SimpleDirective res = new SimpleDirective();
+    String param;
+    String name;
+    Comment comment;
+}
+{
+    (
+          name=param()      { res.setName(name);            }
+        ( param=param()     { res.addParam(param);          }   )+
+        ( comment=comment() { res.setInlineComment(new InlineComment(comment.getText())); }  )*
+    )
+    { return res; }
+}
+
+TagDirective tagDirective():
+{
+    TagDirective res = new TagDirective();
+    String tagName;
+    String param;
+    ConfigurationEntry ce;
+    String endingTagName;
+}
+{
+    (
+    <LEFT_CROC>
+        tagName=param() { res.setName(tagName); }
+        ( param=param() { res.addParam(param); } )+
+    <RIGHT_CROC> <ENDLINE>
+        ( ce=configurationEntry() { res.addChildEntry(ce); } )+
+    <LEFT_ENDING_CROC>
+        endingTagName=param() { res.setEndName(endingTagName); }
+    <RIGHT_CROC>
+    )
+    { return res; }
+}
+
+String param():
+{
+    Token tStr;
+}
+{
+    (
+      tStr=<PARAM>
+    | tStr=<STRING_SQ>
+    )
+    { return tStr.image; }
+}
+
+String endline():
+{
+    Token tStr;
+}
+{
+    tStr=<ENDLINE>  { return tStr.image; }
+    | <EOF>         { return ""; } 
+}
